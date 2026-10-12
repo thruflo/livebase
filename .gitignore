@@ -1,0 +1,7 @@
+.DS_Store
+.env
+.env.local
+.output
+.tanstack
+node_modules
+package-lock.json
