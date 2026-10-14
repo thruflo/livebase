@@ -8,7 +8,7 @@ import { MAX_LENGTHS } from "~/lib/constants";
 import { normalizeDomain, normalizeEmail } from "~/lib/normalize";
 import { db, type Tx } from "~/server/db.server";
 import { getRunner } from "~/server/runner.server";
-import { transactionId } from "~/server/txid.server";
+import { txid } from "~/server/txid.server";
 import { requireWorkspace } from "~/server/workspace.server";
 
 import { parseWith, UserError, userErrors } from "./validation";
@@ -94,13 +94,13 @@ export const updatePerson = createServerFn({ method: "POST" })
     const { workspaceId } = await requireWorkspace();
     const result = await db.transaction(async (tx) => {
       await assertLeadLinks(tx, leadId, workspaceId, eq(leads.personId, personId));
-      const updated = await tx
+      const [updated] = await tx
         .update(people)
         .set({ ...changes, ...userWrite() })
         .where(and(eq(people.id, personId), eq(people.workspaceId, workspaceId)))
-        .returning({ id: people.id });
-      if (updated.length === 0) throw new UserError("Person not found");
-      return transactionId(tx);
+        .returning({ txid });
+      if (updated === undefined) throw new UserError("Person not found");
+      return { txid: updated.txid };
     }).catch(explainConflict("Another person already has this email"));
     // After the commit, so the new run works from the corrected record. The
     // runner skips archived leads. Only extraction links a lead to a record, so
@@ -116,13 +116,13 @@ export const updateCompany = createServerFn({ method: "POST" })
     const { workspaceId } = await requireWorkspace();
     const result = await db.transaction(async (tx) => {
       await assertLeadLinks(tx, leadId, workspaceId, eq(leads.companyId, companyId));
-      const updated = await tx
+      const [updated] = await tx
         .update(companies)
         .set({ ...changes, ...userWrite() })
         .where(and(eq(companies.id, companyId), eq(companies.workspaceId, workspaceId)))
-        .returning({ id: companies.id });
-      if (updated.length === 0) throw new UserError("Company not found");
-      return transactionId(tx);
+        .returning({ txid });
+      if (updated === undefined) throw new UserError("Company not found");
+      return { txid: updated.txid };
     }).catch(explainConflict("Another company already has this domain"));
     getRunner().restartEnrichment({ leadId, workspaceId });
     return result;

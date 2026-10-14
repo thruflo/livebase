@@ -8,7 +8,7 @@ import { db, type Tx } from "~/server/db.server";
 import { deleteLeadThread } from "~/server/mastra/mastra.server";
 import { settleWithin } from "~/server/runner";
 import { getRunner } from "~/server/runner.server";
-import { transactionId } from "~/server/txid.server";
+import { txid } from "~/server/txid.server";
 import { requireWorkspace } from "~/server/workspace.server";
 
 import { parseWith, UserError, userErrors } from "./validation";
@@ -79,8 +79,11 @@ export const createLead = createServerFn({ method: "POST" })
     await getRunner().ready;
     const result = await db.transaction(async (tx) => {
       await tx.insert(leads).values({ id: leadId, workspaceId, updatedBy: "user" });
-      await tx.insert(leadInputs).values({ id: inputId, workspaceId, leadId, rawText });
-      return transactionId(tx);
+      const [input] = await tx
+        .insert(leadInputs)
+        .values({ id: inputId, workspaceId, leadId, rawText })
+        .returning({ txid });
+      return { txid: input!.txid };
     });
     // Start the agents only once the rows are committed, and don't wait for
     // them: the request returns while extraction runs in the background.
@@ -114,7 +117,8 @@ export const updateLead = createServerFn({ method: "POST" })
       const reextract = !(changes.archived ?? lead.archived)
         && (editing || restoring)
         && await awaitingExtraction(tx, id, workspaceId);
-      await tx
+      // The row is locked and exists, so the update always returns it.
+      const [updated] = await tx
         .update(leads)
         .set({
           ...changes,
@@ -122,8 +126,9 @@ export const updateLead = createServerFn({ method: "POST" })
           ...(reextract ? { status: "extracting", statusDetail: null } as const : {}),
           ...userWrite(),
         })
-        .where(leadInWorkspace(id, workspaceId));
-      return { result: await transactionId(tx), reextract };
+        .where(leadInWorkspace(id, workspaceId))
+        .returning({ txid });
+      return { result: { txid: updated!.txid }, reextract };
     });
 
     // Runner calls follow the commit, so a restarted run reads the new values.
@@ -155,12 +160,13 @@ export const deleteLead = createServerFn({ method: "POST" })
     const result = await db.transaction(async (tx) => {
       // Inputs cascade. Findings about the person or company stay, with a null
       // lead_id, because other leads can share them. Findings about the lead
-      // itself go with it.
-      const deleted = await tx
+      // itself go with it. The txid comes from the lead's delete, because the
+      // findings delete can match nothing.
+      const [deleted] = await tx
         .delete(leads)
         .where(leadInWorkspace(id, workspaceId))
-        .returning({ id: leads.id });
-      if (deleted.length === 0) throw new UserError("Lead not found");
+        .returning({ txid });
+      if (deleted === undefined) throw new UserError("Lead not found");
       await tx
         .delete(findings)
         .where(and(
@@ -168,7 +174,7 @@ export const deleteLead = createServerFn({ method: "POST" })
           eq(findings.subjectType, "lead"),
           eq(findings.subjectId, id),
         ));
-      return transactionId(tx);
+      return { txid: deleted.txid };
     });
 
     // The lead is gone either way, so a leftover thread is logged, not
