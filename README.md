@@ -2,6 +2,10 @@
 
 Livebase is an agentic CRM and sales pipeline demo built with Neon Realtime and Mastra. It demonstrates a modern, AI-enabled app on the Neon platform, with users and agents working on the same data in realtime.
 
+<p>
+  <img width="2826" height="2122" alt="livebase-image" src="https://github.com/user-attachments/assets/fe37ad3b-8b78-4ce7-af50-09d6259a0ce4" />
+</p>
+
 You paste whatever you have about a lead, such as an email address, a LinkedIn URL, or a paragraph of notes. Agents are spawned in the background to enrich the data. They write back to the database, with the enriched data appearing in realtime.
 
 Open the app in two windows and paste a lead. The new row appears in both windows at once and fills in as the extraction agent works. The enrichment agent then researches the company and the person, and the logo, company details, avatar, and colleagues appear one by one. The lead's activity panel shows each agent run as it happens. Change the lead's stage in one window and the other follows.
