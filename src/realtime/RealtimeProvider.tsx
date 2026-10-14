@@ -94,9 +94,10 @@ export function RealtimeProvider({
   // the provider's lifetime.
   useEffect(() => {
     if (!collections) return;
-    const subscriptions = [collections.leads, collections.leadInputs].map((collection) =>
-      collection.subscribeChanges(() => undefined),
-    );
+    const subscriptions = [
+      collections.leads.subscribeChanges(() => undefined),
+      collections.leadInputs.subscribeChanges(() => undefined),
+    ];
     return () => {
       for (const subscription of subscriptions) subscription.unsubscribe();
     };

@@ -12,11 +12,12 @@ import { hasFailed, toConnectionStatus } from "~/realtime/connection-status";
 import type { ConnectionStore } from "~/realtime/connection-store";
 import { useRealtime } from "~/realtime/RealtimeProvider";
 
-// Collections expose no stale flag (Neon's `stale` stays TanStack's `ready`),
-// so a tiny subscription of our own reports the connection. Its state is its
-// own: a failure ends this subscription, and the other collections may keep
-// streaming. The SDK reports a connection-wide failure only through the
-// logger, which `connection` receives.
+// Collections expose no reconnecting flag (once loaded, Neon's `connecting`
+// and `stale` stay TanStack's `ready`), so a tiny subscription of our own
+// reports the connection. Its state is its own: a failure ends this
+// subscription, and the other collections may keep streaming. The SDK reports
+// a connection-wide failure only through the logger, which `connection`
+// receives.
 export function useConnectionProbe(
   client: RealtimeClient,
   query: SealedLiveQuery<Workspace>,
@@ -34,7 +35,7 @@ export function useConnectionProbe(
       const connectionFailed = connection.isFailed();
       if (state.status === "live") hasBeenLive = true;
       // A failed subscription rejects every renewal, and each attempt bounces
-      // it through `stale`. Stop refreshing, or it would retry every second.
+      // it through `connecting`. Stop refreshing, or it would retry every second.
       if (connectionFailed || hasFailed(state)) refresh.stop();
       setStatus(toConnectionStatus(state, hasBeenLive, navigator.onLine, connectionFailed));
     };

@@ -165,7 +165,7 @@ describe("searchResults", () => {
     assert.deepEqual(
       results.map((result) => result.url),
       [
-        "https://blog.electric-sql.com/author/james-arthur/",
+        "https://blog.electric.ax/author/james-arthur/",
         "https://www.forbes.com/profile/james-arthur/",
         "https://exa.ai/blog/people-search",
       ],

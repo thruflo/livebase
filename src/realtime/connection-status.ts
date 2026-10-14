@@ -4,7 +4,8 @@ import type { ConnectionStatus } from "~/lib/types";
 
 // The SDK reports every subscription `error` as final: a failed subscription
 // never recovers by itself, so only a reload helps. Socket loss and retryable
-// server errors stay `stale` or `connecting` while the client renews.
+// server errors stay `connecting` while the client reconnects, and an expired
+// sealed query is `stale` until it's renewed.
 export function hasFailed(state: LiveQueryState): boolean {
   return state.status === "error";
 }
