@@ -190,7 +190,7 @@ describe("companyFields", () => {
     it("accepts the company's domain when the input names one of its subdomains", () => {
       const fields = companyFields(
         extraction({ company: company({ name: "Electric", domain: "electric.ax" }) }),
-        "James Arthur, see https://blog.electric-sql.com/author/james/",
+        "James Arthur, see https://blog.electric.ax/author/james/",
       );
       assert.equal(fields?.domain, "electric.ax");
     });
