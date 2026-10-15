@@ -6,11 +6,11 @@ import { DEMO_USER_ID, DEMO_WORKSPACE_ID, DEMO_WORKSPACE_NAME } from "~/lib/cons
 
 import { db } from "./db.server";
 
-// The single seam where authentication will plug in later: Neon Auth or Better
-// Auth will resolve the session's workspace here. Until then there's no
-// sign-in, so every caller gets the seeded demo workspace. Server
-// functions take the workspace ID only from here, so adding auth changes
-// neither the data model nor the queries.
+// The single seam where authentication will plug in later: Neon's
+// Managed Better Auth or Better Auth will resolve the session's workspace
+// here. Until then there's no sign-in, so every caller gets the seeded demo
+// workspace. Server functions take the workspace ID only from here, so
+// adding auth changes neither the data model nor the queries.
 export async function requireWorkspace(): Promise<{ workspaceId: string; workspaceName: string; userId: string }> {
   return {
     workspaceId: DEMO_WORKSPACE_ID,

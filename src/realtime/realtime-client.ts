@@ -22,7 +22,7 @@ export function realtimeUrl(): string {
 export function createLivebaseClient(onEntry?: (entry: RealtimeLogEntry) => void): RealtimeClient {
   return createRealtimeClient({
     url: realtimeUrl(),
-    parsers: drizzleParsers,
+    parsers: { ...drizzleParsers },
     // Warnings and errors in production: `connection_failed`,
     // `query_expired`, `subscription_renewal_failed`. Info adds connection
     // lifecycle in the browser in development. The server's clients never

@@ -202,7 +202,7 @@ column, so the schemas use only Drizzle's default column modes. `loadWorkspaceDa
 
 ### Workspace scoping
 
-Every server function calls `requireWorkspace()` in `src/server/workspace.server.ts` to find the caller's workspace. The app has no authentication yet, so it returns the demo workspace that `db:setup` seeds, and every browser shares it. Each live query in `src/server/live-queries.server.ts` filters on one equality: the domain tables on the workspace ID and Mastra's tables on `resourceId`. The per-lead messages query also filters on `threadId`, after `assertLeadInWorkspace()` checks that the lead belongs to the workspace. The server authorizes every query, so a browser can subscribe only to its own workspace's rows. When Neon Auth or Better Auth is added, `requireWorkspace()` is the one function that changes.
+Every server function calls `requireWorkspace()` in `src/server/workspace.server.ts` to find the caller's workspace. The app has no authentication yet, so it returns the demo workspace that `db:setup` seeds, and every browser shares it. Each live query in `src/server/live-queries.server.ts` filters on one equality: the domain tables on the workspace ID and Mastra's tables on `resourceId`. The per-lead messages query also filters on `threadId`, after `assertLeadInWorkspace()` checks that the lead belongs to the workspace. The server authorizes every query, so a browser can subscribe only to its own workspace's rows. When Neon's [Managed Better Auth](https://neon.com/docs/auth/overview) or Better Auth is added, `requireWorkspace()` is the one function that changes.
 
 ## Project layout
 

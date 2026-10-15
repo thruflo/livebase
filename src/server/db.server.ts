@@ -19,6 +19,6 @@ if (process.env.NODE_ENV !== "production") globalDatabase.livebasePool = pool;
 export const db = drizzle(pool);
 
 export type Db = typeof db;
-// The handle passed to `db.transaction(async (tx) => ...)`. Mutations run in
-// one so that they can return the transaction ID (see `txid.server.ts`).
+// The handle passed to `db.transaction(async (tx) => ...)`, for mutations
+// whose statements must commit together.
 export type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
